@@ -1,0 +1,1154 @@
+* Org                                                              :noexport:
+  #+TITLE: MS-DOS cc65 Programs
+  #+AUTHOR: Kyle W T Sherman
+  #+EMAIL: kylewsherman@gmail.com
+  #+FILENAME: ms-dos-cc65.org
+  #+DESCRIPTION: Org/Babel 'Literate' Version of MS-DOS Programs
+  #+KEYWORDS: emacs, org-mode, babel, c, cc65, ms-dos, dos, msdos, programming language, literate programming, reproducible research
+  #+LANGUAGE: en
+  #+PROPERTY: header-args :tangle no :noweb yes :padline yes :comments no :results silent :dir /tmp :mkdirp yes
+  #+STARTUP: noindent odd overview
+  #+TIMESTAMP: <2023-01-27 16:52 (kyle)>
+
+* Constants
+
+*** Name
+
+    #+NAME: name
+    #+BEGIN_SRC org
+      Kyle Sherman
+    #+END_SRC
+
+    #+NAME: full-name
+    #+BEGIN_SRC org
+      Kyle W T Sherman
+    #+END_SRC
+
+*** Author
+
+    #+NAME: author
+    #+BEGIN_SRC org
+      Author: <<full-name>>
+    #+END_SRC
+
+*** Email
+
+    #+NAME: email-gen
+    #+BEGIN_SRC emacs-lisp
+      (concat "kyle" "w" "sherman" "@" "gmail" "." "com")
+    #+END_SRC
+
+    #+NAME: email
+    #+BEGIN_SRC org
+      <<email-gen()>>
+    #+END_SRC
+
+*** Author-Email
+
+    #+NAME: author-email-gen
+    #+BEGIN_SRC emacs-lisp
+      (concat "<<author>>" " <" "<<email>>" ">")
+    #+END_SRC
+
+    #+NAME: author-email
+    #+BEGIN_SRC org
+      <<author-email-gen()>>
+    #+END_SRC
+
+*** Copyright
+
+    #+NAME: year
+    #+BEGIN_SRC emacs-lisp
+      (format-time-string "%Y" nil t)
+    #+END_SRC
+
+    #+NAME: year-range
+    #+BEGIN_SRC emacs-lisp :var start-year="2023"
+      (if (string= "<<year()>>" start-year)
+          start-year
+        (concat start-year "-<<year()>>"))
+    #+END_SRC
+
+    #+NAME: copyright
+    #+BEGIN_SRC org
+      Copyright © <<year-range()>> <<full-name>>
+    #+END_SRC
+
+*** Header
+
+    #+NAME: header
+    #+BEGIN_SRC org
+      // <<copyright>>
+      // BSD 2-Clause License
+    #+END_SRC
+
+*** License Header
+
+    #+NAME: license-header
+    #+BEGIN_SRC conf-unix
+      BSD 2-Clause License
+
+      <<copyright>>
+
+      All rights reserved.
+
+      Redistribution and use in source and binary forms, with or without
+      modification, are permitted provided that the following conditions are met:
+
+      1. Redistributions of source code must retain the above copyright notice, this
+      list of conditions and the following disclaimer.
+
+      2. Redistributions in binary form must reproduce the above copyright notice,
+      this list of conditions and the following disclaimer in the documentation
+      and/or other materials provided with the distribution.
+
+      THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+      AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+      IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+      DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+      FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+      DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+      SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+      CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+      OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+      OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+    #+END_SRC
+
+* BIN
+
+*** CWSDPMI.EXE
+
+    #+BEGIN_SRC sh :var path=(file-name-directory (buffer-file-name))
+      mkdir -p "${path}"/bin
+      base64 -d > "${path}/bin/CWSDPMI.EXE" <<EOF
+      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
+      AAAe6PwDHuj4Ax7o9AMe6PADHujsAx7o6AMe6OQDHujgAx7o3AMe6NgDHujUAx7o0AMe6MwDHujI
+      Ax7oxAMe6MADHui8Ax7ouAMe6LQDHuiwAx7orAMe6KgDHuikAx7ooAMe6JwDHuiYAx7olAMe6JAD
+      HuiMAx7oiAMe6IQDHuiAAx7ofAMe6HgDHuh0Ax7ocAMe6GwDHuhoAx7oZAMe6GADHuhcAx7oWAMe
+      6FQDHuhQAx7oTAMe6EgDHuhEAx7oQAMe6DwDHug4Ax7oNAMe6DADHugsAx7oKAMe6CQDHuggAx7o
+      HAMe6BgDHugUAx7oEAMe6AwDHugIAx7oBAMe6AADHuj8Ah7o+AIe6PQCHujwAh7o7AIe6OgCHujk
+      Ah7o4AIe6NwCHujYAh7o1AIe6NACHujMAh7oyAIe6MQCHujAAh7ovAIe6LgCHui0Ah7osAIe6KwC
+      HuioAh7opAIe6KACHuicAh7omAIe6JQCHuiQAh7ojAIe6IgCHuiEAh7ogAIe6HwCHuh4Ah7odAIe
+      6HACHuhsAh7oaAIe6GQCHuhgAh7oXAIe6FgCHuhUAh7oUAIe6EwCHuhIAh7oRAIe6EACHug8Ah7o
+      OAIe6DQCHugwAh7oLAIe6CgCHugkAh7oIAIe6BwCHugYAh7oFAIe6BACHugMAh7oCAIe6AQCHugA
+      Ah7o/AEe6PgBHuj0AR7o8AEe6OwBHujoAR7o5AEe6OABHujcAR7o2AEe6NQBHujQAR7ozAEe6MgB
+      HujEAR7owAEe6LwBHui4AR7otAEe6LABHuisAR7oqAEe6KQBHuigAR7onAEe6JgBHuiUAR7okAEe
+      6IwBHuiIAR7ohAEe6IABHuh8AR7oeAEe6HQBHuhwAR7obAEe6GgBHuhkAR7oYAEe6FwBHuhYAR7o
+      VAEe6FABHuhMAR7oSAEe6EQBHuhAAR7oPAEe6DgBHug0AR7oMAEe6CwBHugoAR7oJAEe6CABHugc
+      AR7oGAEe6BQBHugQAR7oDAEe6AgBHugEAR7oAAEe6PwAHuj4AB7o9AAe6PAAHujsAB7o6AAe6OQA
+      HujgAB7o3AAe6NgAHujUAB7o0AAe6MwAHujIAB7oxAAe6MAAHui8AB7ouAAe6LQAHuiwAB7orAAe
+      6KgAHuikAB7ooAAe6JwAHuiYAB7olAAe6JAAHuiMAB7oiAAe6IQAHuiAAB7ofAAe6HgAHuh0AB7o
+      cAAe6GwAHuhoAB7oZAAe6GAAHuhcAB7oWAAe6FQAHuhQAB7oTAAe6EgAHuhEAB7oQAAe6DwAHug4
+      AB7oNAAe6DAAHugsAB7oKAAe6CQAHuggAB7oHAAe6BgAHugUAB7oEAAe6AwAHugIAB7oBAAe6AAA
+      ajMfjwaePIEunjwkOsEunjwCH+oAAHAAix6mEKGePIhHZ2aLdziOZ1A8D3dPLAhyS4v4gL2OAwB0
+      JWRni0YIgOQwgPwwdBiQkGZkZ4sGZolHbGaDxgQPINBmiUdo6x1mZGcPtQ5lZ4tB/jzNdQ44Z2d1
+      CYvPAg4AA4hPZ2ZkZ4sGZolHIGZkZ4tGCGaJRyRkZ4tGBItPTIlHTGaDxgwzwagDdA1kZ4tGBIlH
+      UGZkZ4s2Zol3OMYGdCcBZjPAjuCO6A8i0OoAAGgA6Uz/agDrPGoG6zhqDOs0ahLrMGoY6yxqHuso
+      aiTrJGoq6yBqMOscajbrGGo86xRqQusQakjrDGpO6whqVOsEalrrAFWL7B4GZlZmV2ZRajMfgD7+
+      AgB1CmaNPm4jajMH6wtmi34QjkYUZoPvFP4G/gJmuQUAAABmD7f1g8YE/PNmNmelZoPvIGYmZ8dH
+      CAIwAAAmZ8dHBCsAZiZnxwf3EQAAh14CZouPzhJmiU4Ei4/SEolOCMdGDAIwZol+EIxGFGZZZl9m
+      XgcfXVtmz4D8Aw+FJ/s8Ag+PIfseBmZWZldmUQYfZov3uTMAjsFmv8AQAABmuRkAAAD882elZllm
+      X2ZeBx/p9PqcHmZWZldmUbkzAI7ZZr7AEAAAZrkVAAAA/PNnpWZZZl9mXh+dZi4PsiYlQABm6gAA
+      AAAAAAAAAAAAAA8GZs/NCM/NCc/NCs/NC8/NDM/NDc/NDs/ND89VVlf/NugCiSboAoEu6AKAAB6L
+      HqYQi0ckJdU+UA7oQQCc+mZTix6mEGaJRyhmiU8sZolXMGaJd0BmiX9EZolvPGaPRzRYutUOi08k
+      I8L30iPKC8GJRyQfjwboAl9eXTPAw4Dk/VAzyY7Bik9nweECi/lmJv81ZotHKGaLTyxmi1cwZot3
+      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
+      dmFsaWQgVFNTAFNlZ21lbnQgTm90IFByZXNlbnQAU3RhY2sgRmF1bHQAR2VuZXJhbCBQcm90ZWN0
+      aW9uIEZhdWx0AFBhZ2UgRmF1bHQARlBVIEVycm9yAA0KAEludCAweCUwMngAJXMAIGNyMj0lMDhs
+      eAAgaW4gUk1DQgAgYXQgZWlwPSVseDsgZmxhZ3M9JXgKAGVheD0lMDhseCBlYng9JTA4bHggZWN4
+      PSUwOGx4IGVkeD0lMDhseCBlc2k9JTA4bHggZWRpPSUwOGx4CgBlYnA9JTA4bHggZXNwPSUwOGx4
+      IGNzPSV4IGRzPSV4IGVzPSV4IGZzPSV4IGdzPSV4IHNzPSV4IGVycm9yPSUwNHgKAERPUyAzIHJl
+      cXVpcmVkLgoAQ1dTRFBNSSBWMC45MCsgKHI3KSBDb3B5cmlnaHQgKEMpIDIwMTAgQ1cgU2FuZG1h
+      bm4gIEFCU09MVVRFTFkgTk8gV0FSUkFOVFkKAFByb3RlY3RlZCBtb2RlIG5vdCBhY2Nlc3NpYmxl
+      LgoARGVzY3JpcHRvcnMgZXhoYXVzdGVkLgoA//9XYXJuaW5nOiBjYW5ub3Qgb3BlbiBzd2FwIGZp
+      bGUgJXMKAE5vIHN3YXAgc3BhY2UhCgBTd2FwIGRpc2sgZnVsbCEKAAAA0wQYGBgYGBgYGBgYGBgY
+      GBgYGBgACAgPcHcAiJCYoKiwuPhoeABsFWwVR0BsFWwVbBVsFWwVZBVsFWwVbBVsFWwVfBZsFUdA
+      R0BHQEdAR0BHQEdAR0BkFUdAR0BHQEdAZBVkFWQVZBW/FmQVZBVkFWQVZBVkFUdAR0BHQEdAR0BH
+      QEdA4hZkFboYBwBDV1NEUE1JAAAAAAAAAAAAAAAAAAEAAAABAAEBAQEBAIwlAAAAAENXU0RQTUkg
+      bm90IHJlbW92ZWQNCiQAAP//CkVycm9yOiBVc2luZyBYTVMgc3dpdGNoZWQgQ1BVIGludG8gVjg2
+      IG1vZGUuCgBFcnJvcjogY291bGQgbm90IGFsbG9jYXRlIHBhZ2UgdGFibGUgbWVtb3J5CgAAAEVN
+      TVhYWFgwAA==
+      EOF
+      chmod 755 "${path}/bin/CWSDPMI.EXE"
+    #+END_SRC
+
+* Shared
+
+*** Sleep
+
+***** sleep.h
+
+      #+NAME: sleep_h
+      #+BEGIN_SRC c
+        #ifndef _SLEEP_H
+        #define _SLEEP_H
+
+        #include <dpmi.h>
+        #include <errno.h>
+        #include <time.h>
+
+        void sleep(unsigned int msec);
+
+        #endif
+      #+END_SRC
+
+***** sleep.c
+
+      #+NAME: sleep_c
+      #+BEGIN_SRC c
+        #include "sleep.h"
+
+        static int have_yield = -1;
+
+        void sleep_init(void) {
+            if (have_yield < 0) {
+                errno = 0;
+                __dpmi_yield();
+                have_yield = errno ? 0 : 1;
+            }
+        }
+
+        void sleep(unsigned int msec) {
+            uclock_t sleep_time;
+
+            sleep_init();
+
+            sleep_time = uclock() + msec * UCLOCKS_PER_SEC / 1000;
+
+            if (have_yield) {
+                while (uclock() < sleep_time) __dpmi_yield();
+            } else {
+                while (uclock() < sleep_time) __asm__ volatile ("hlt");
+            }
+        }
+      #+END_SRC
+
+* Programs
+
+*** Hello World
+
+***** Makefile
+
+      #+BEGIN_SRC makefile :tangle hello/Makefile
+        .RECIPEPREFIX = >
+
+        CXX = i686-pc-msdosdjgpp-gcc
+        #CXXFLAGS = -m16 -Wall
+        CXXFLAGS = -m32 -Wall
+
+        all: hello
+
+        hello:
+        > cp ../bin/CWSDPMI.EXE .
+        > $(CXX) $(CXXFLAGS) -o hello.exe *.c
+
+        clean:
+        > rm -f *.exe *.EXE
+      #+END_SRC
+
+***** hello
+
+      #+BEGIN_SRC c :tangle hello/hello.c
+        /**
+         ,* Hello World
+         ,*/
+
+        #include <stdio.h>                      // printf
+        #include <stdlib.h>                     // EXIT_SUCCESS
+
+        int main(void) {
+            printf("Hello World!\n");
+            return EXIT_SUCCESS;
+        }
+      #+END_SRC
+
+***** Build and Run
+
+      #+BEGIN_SRC sh :dir (file-name-directory buffer-file-name)
+        cd hello
+        make clean && make && dosbox hello.exe &
+      #+END_SRC
+
+*** Qix Lines
+
+***** Makefile
+
+      #+BEGIN_SRC makefile :tangle qixlines/Makefile
+        .RECIPEPREFIX = >
+
+        CXX = i686-pc-msdosdjgpp-gcc
+        #CXXFLAGS = -m16 -Wall
+        CXXFLAGS = -m32 -Wall
+
+        all: qixlines
+
+        qixlines:
+        > cp ../bin/CWSDPMI.EXE .
+        > $(CXX) $(CXXFLAGS) -o qixlines.exe *.c
+
+        clean:
+        > rm -f *.exe *.EXE
+      #+END_SRC
+
+***** sleep
+
+      #+BEGIN_SRC c :tangle :tangle qixlines/sleep.h
+        <<sleep_h>>
+      #+END_SRC
+
+      #+BEGIN_SRC c :tangle :tangle qixlines/sleep.c
+        <<sleep_c>>
+      #+END_SRC
+
+***** qixlines
+
+      #+BEGIN_SRC c :tangle qixlines/qixlines.c
+        /**
+         ,* QIX Lines
+         ,*/
+
+        #include <conio.h>                      // clrscr getch
+        #include <dos.h>                        // int86 outp
+        #include <math.h>                       // sin
+        #include <stdio.h>                      // printf sprintf
+        #include <stdlib.h>                     // EXIT_SUCCESS EXIT_FAILURE malloc
+        #include <sys/nearptr.h>                // __djgpp_nearptr_enable __djgpp_nearptr_disable
+
+        //#include "sleep.h"
+
+        #define VIDEO_INT 0x10                  // BIOS video interrupt
+        #define SET_MODE 0x00                   // BIOS function to set video mode
+        #define VGA_256_COLOR_MODE 0x13         // use to set 256 VGA color mode
+        #define TEXT_MODE 0x03                  // use to set text mode
+        #define PIXEL_PLOT 0x0C                 // BIOS function to plot a pixel
+        #define VIDEO_MEMORY 0xA0000;           // start of video memory
+        #define SYSTEM_CLOCK 0x046C;            // system clock memory location
+        #define SCREEN_WIDTH 320                // width in pixels of VGA mode 0x13
+        #define SCREEN_HEIGHT 200               // height in pixels of VGA mode 0x13
+        #define NUM_COLORS 256                  // number of colors in VGA mode
+        #define CLOCK_HZ 18.2                   // system clock HZ
+
+        #define COLOR_BG 0
+        #define COLOR_FG 1
+        #define MAX_SIN 180
+        #define HISTORY_SIZE 10                 // how many lines to display at once
+        #define STEP 8                          // line spacing
+        #define STEP_RANGE 6                    // spacing plus/minus range
+
+        // use all colors except black (0)
+        #define RANDOM_COLOR() (rand() % (NUM_COLORS - 1) + 1)
+
+        typedef unsigned char byte;
+        typedef unsigned short ushort;
+
+        // line
+        typedef struct {
+            int x1;
+            int y1;
+            int x2;
+            int y2;
+            byte color;
+        } line_s;
+
+        // globals
+        byte* vga = (byte*)VIDEO_MEMORY;
+        ushort* clk = (ushort*)SYSTEM_CLOCK;
+
+        void set_mode(byte mode) {
+            union REGS regs;
+
+            regs.h.ah = SET_MODE;
+            regs.h.al = mode;
+            int86(VIDEO_INT, &regs, &regs);
+        }
+
+        void linecpy(line_s *target_line, line_s *source_line) {
+            target_line->x1 = source_line->x1;
+            target_line->y1 = source_line->y1;
+            target_line->x2 = source_line->x2;
+            target_line->y2 = source_line->y2;
+            target_line->color = source_line->color;
+        }
+
+        void draw_pixel(int x, int y, byte color) {
+            int offset;
+
+            offset = y * SCREEN_WIDTH + x;
+            //offset = (y<<8) + (y<<6) + x;       // faster, but harder to understand
+            vga[offset] = color;
+        }
+
+        void draw_line(line_s *line) {
+            int x1, y1, x2, y2, dx, dy, x, y;
+
+            // reverse line if x1 > x2
+            if (line->x1 < line->x2) {
+                x1 = line->x1;
+                y1 = line->y1;
+                x2 = line->x2;
+                y2 = line->y2;
+            } else {
+                x1 = line->x2;
+                y1 = line->y2;
+                x2 = line->x1;
+                y2 = line->y1;
+            }
+
+            dx = x2 - x1;
+            dy = y2 - y1;
+            for (x = x1; x <= x2; x++) {
+                // prevent divide by 0 error
+                if (dx == 0) {
+                    y = y1 + dy * (x - x1);
+                } else {
+                    y = y1 + dy * (x - x1) / dx;
+                }
+                draw_pixel(x, y, line->color);
+            }
+        }
+
+        int next_degree(int degree) {
+            // add randomly to the degree
+            int d = degree + STEP + rand() % (STEP_RANGE * 2 + 1) - STEP_RANGE;
+            if (d >= MAX_SIN) d = d - MAX_SIN;
+            return d;
+        }
+
+        void next_line(line_s *line, line_s *line_delta, line_s *line_degree) {
+            // randomly add to the degrees
+            line_degree->x1 = next_degree(line_degree->x1);
+            line_degree->y1 = next_degree(line_degree->y1);
+            line_degree->x2 = next_degree(line_degree->x2);
+            line_degree->y2 = next_degree(line_degree->y2);
+
+            // add using sin modified by a delta for each coordinate dimension
+            line->x1 += (int)(line_delta->x1 * sin(line_degree->x1));
+            line->y1 += (int)(line_delta->y1 * sin(line_degree->y1));
+            line->x2 += (int)(line_delta->x2 * sin(line_degree->x2));
+            line->y2 += (int)(line_delta->y2 * sin(line_degree->y2));
+
+            // if any coordinates are out of range, reverse their direction and change color
+            if (line->x1 < 0) {
+                line->x1 = 0 - line->x1;
+                line_delta->x1 = -line_delta->x1;
+                line->color = RANDOM_COLOR();
+            }
+            if (line->x1 >= SCREEN_WIDTH) {
+                line->x1 = SCREEN_WIDTH - (line->x1 - SCREEN_WIDTH);
+                line_delta->x1 = -line_delta->x1;
+                line->color = RANDOM_COLOR();
+            }
+            if (line->y1 < 0) {
+                line->y1 = 0 - line->y1;
+                line_delta->y1 = -line_delta->y1;
+                line->color = RANDOM_COLOR();
+            }
+            if (line->y1 >= SCREEN_HEIGHT) {
+                line->y1 = SCREEN_HEIGHT - (line->y1 - SCREEN_HEIGHT);
+                line_delta->y1 = -line_delta->y1;
+                line->color = RANDOM_COLOR();
+            }
+            if (line->x2 < 0) {
+                line->x2 = 0 - line->x2;
+                line_delta->x2 = -line_delta->x2;
+                line->color = RANDOM_COLOR();
+            }
+            if (line->x2 >= SCREEN_WIDTH) {
+                line->x2 = SCREEN_WIDTH - (line->x2 - SCREEN_WIDTH);
+                line_delta->x2 = -line_delta->x2;
+                line->color = RANDOM_COLOR();
+            }
+            if (line->y2 < 0) {
+                line->y2 = 0 - line->y2;
+                line_delta->y2 = -line_delta->y2;
+                line->color = RANDOM_COLOR();
+            }
+            if (line->y2 >= SCREEN_HEIGHT) {
+                line->y2 = SCREEN_HEIGHT - (line->y2 - SCREEN_HEIGHT);
+                line_delta->y2 = -line_delta->y2;
+                line->color = RANDOM_COLOR();
+            }
+        }
+
+        // draw lines until a key is pressed
+        void draw_lines() {
+            line_s line, line_delta, line_degree, line_history[HISTORY_SIZE];
+            ushort i, history_index;
+            int t;
+
+            // randomize starting values
+            line.x1 = rand() % SCREEN_WIDTH;
+            line.y1 = rand() % SCREEN_HEIGHT;
+            line.x2 = rand() % SCREEN_WIDTH;
+            line.y2 = rand() % SCREEN_HEIGHT;
+            line.color = COLOR_BG;
+
+            line_delta.x1 = STEP;
+            line_delta.y1 = STEP;
+            line_delta.x2 = STEP;
+            line_delta.y2 = STEP;
+
+            line_degree.x1 = rand() % MAX_SIN;
+            line_degree.y1 = rand() % MAX_SIN;
+            line_degree.x2 = rand() % MAX_SIN;
+            line_degree.y2 = rand() % MAX_SIN;
+
+            // initialize history
+            for (i = 0; i < HISTORY_SIZE; i++) {
+                linecpy(&line_history[i], &line);
+            }
+            history_index = 0;
+
+            // loop until key-press
+            while (!kbhit()) {
+                // get next line
+                next_line(&line, &line_delta, &line_degree);
+
+                // draw line
+                draw_line(&line);
+
+                // undraw oldest line
+                line_history[history_index].color = COLOR_BG;
+                draw_line(&line_history[history_index]);
+
+                // add to history
+                linecpy(&line_history[history_index++], &line);
+                if (history_index >= HISTORY_SIZE) history_index = 0;
+
+                // pause to slow down draw speed
+                for (t = 0; t < 100000; t++) {}
+            }
+
+            // consume key-press
+            getch();
+        }
+
+        int main(void) {
+            if (__djgpp_nearptr_enable() == 0) {
+                printf("Could not get access to first 640K of memory\n");
+                exit(EXIT_FAILURE);
+            }
+
+            vga += __djgpp_conventional_base;
+            clk = (void*)clk + __djgpp_conventional_base;
+
+            // seed number generator
+            srand(*clk);
+
+            // set vga mode and clear screen
+            set_mode(VGA_256_COLOR_MODE);
+
+            // main loop
+            draw_lines();
+
+            // set text mode and clear screen
+            set_mode(TEXT_MODE);
+            clrscr();
+
+            __djgpp_nearptr_disable();
+
+            return EXIT_SUCCESS;
+        }
+      #+END_SRC
+
+***** Build and Run
+
+      #+BEGIN_SRC sh :dir (file-name-directory buffer-file-name)
+        cd qixlines
+        make clean && make && dosbox qixlines.exe &
+      #+END_SRC
+
+*** +Qix Lines (Multi-Color)+
+
+***** Makefile
+
+      #+BEGIN_SRC makefile :tangle qix-lines-multi-color/Makefile
+        .RECIPEPREFIX = >
+
+        CXX = cc65
+        CLX = cl65
+        CXXFLAGS = -t DOS -O
+
+        all: qixlinesmc.prg
+
+        qixlinesmc.prg:
+        > $(CLX) $(CXXFLAGS) -o qixlinesmc.prg *.c
+
+        clean:
+        > rm -f *.prg *.inc *.o
+      #+END_SRC
+
+***** common
+
+      #+BEGIN_SRC c :tangle :tangle qix-lines-multi-color/common.h
+        <<common_h>>
+      #+END_SRC
+
+      #+BEGIN_SRC c :tangle :tangle qix-lines-multi-color/common.c
+        <<common_c>>
+      #+END_SRC
+
+***** mcbitmap
+
+      #+BEGIN_SRC c :tangle :tangle qix-lines-multi-color/mcbitmap.h
+        <<mcbitmap_h>>
+      #+END_SRC
+
+      #+BEGIN_SRC c :tangle :tangle qix-lines-multi-color/mcbitmap.c
+        <<mcbitmap_c>>
+      #+END_SRC
+
+***** qixlinesmc
+
+      #+BEGIN_SRC c :tangle qix-lines-multi-color/qixlinesmc.c
+        /**
+         ,* QIX Lines (Multi-Color)
+         ,*/
+
+        #include <DOS.h>
+        #include <cc65.h>
+        #include <conio.h>
+        #include <ctype.h>
+        #include <modload.h>
+        #include <stdio.h>
+        #include <stdlib.h>
+        #include <tgi.h>
+
+        #include "mcbitmap.h"
+
+        #define X_SIZE 160
+        #define Y_SIZE 192
+        #define MAX_COLORS 16
+        #define COLOR_BG TGI_COLOR_BLACK
+        #define MAX_SIN 180
+        #define HISTORY_SIZE 10                 // how many lines to display at once
+        #define STEP 10                         // line spacing
+        #define STEP_RANGE 9                    // spacing plus/minus range
+        #define QIX_COUNT 3                     // number of qixs to display
+
+        // use all colors except black (0)
+        #define RANDOM_COLOR() (rand() % (MAX_COLORS - 1) + 1)
+
+        // line
+        typedef struct {
+            int x1;
+            int y1;
+            int x2;
+            int y2;
+            byte color;
+        } line_s;
+
+        int next_degree(int degree) {
+            // add randomly to the degree
+            int d = degree + STEP + (int)rand() % (STEP_RANGE * 2 + 1) - STEP_RANGE;
+            if (d >= MAX_SIN) d = d - MAX_SIN;
+            return d;
+        }
+
+        void next_line(line_s *line, line_s *line_delta, line_s *line_degree) {
+            // randomly add to the degrees
+            line_degree->x1 = next_degree(line_degree->x1);
+            line_degree->y1 = next_degree(line_degree->y1);
+            line_degree->x2 = next_degree(line_degree->x2);
+            line_degree->y2 = next_degree(line_degree->y2);
+
+            // add using sin modified by a delta for each coordinate dimension
+            line->x1 += (int)(((long) line_delta->x1 * _sin(line_degree->x1)) / 256);
+            line->y1 += (int)(((long) line_delta->y1 * _sin(line_degree->y1)) / 256);
+            line->x2 += (int)(((long) line_delta->x2 * _sin(line_degree->x2)) / 256);
+            line->y2 += (int)(((long) line_delta->y2 * _sin(line_degree->y2)) / 256);
+
+            // if any coordinates are out of range, reverse their direction and change color
+            if (line->x1 < 0) {
+                line->x1 = 0 - line->x1;
+                line_delta->x1 = -line_delta->x1;
+                line->color = RANDOM_COLOR();
+            }
+            if (line->x1 >= X_SIZE) {
+                line->x1 = X_SIZE - (line->x1 - X_SIZE);
+                line_delta->x1 = -line_delta->x1;
+                line->color = RANDOM_COLOR();
+            }
+            if (line->y1 < 0) {
+                line->y1 = 0 - line->y1;
+                line_delta->y1 = -line_delta->y1;
+                line->color = RANDOM_COLOR();
+            }
+            if (line->y1 >= Y_SIZE) {
+                line->y1 = Y_SIZE - (line->y1 - Y_SIZE);
+                line_delta->y1 = -line_delta->y1;
+                line->color = RANDOM_COLOR();
+            }
+            if (line->x2 < 0) {
+                line->x2 = 0 - line->x2;
+                line_delta->x2 = -line_delta->x2;
+                line->color = RANDOM_COLOR();
+            }
+            if (line->x2 >= X_SIZE) {
+                line->x2 = X_SIZE - (line->x2 - X_SIZE);
+                line_delta->x2 = -line_delta->x2;
+                line->color = RANDOM_COLOR();
+            }
+            if (line->y2 < 0) {
+                line->y2 = 0 - line->y2;
+                line_delta->y2 = -line_delta->y2;
+                line->color = RANDOM_COLOR();
+            }
+            if (line->y2 >= Y_SIZE) {
+                line->y2 = Y_SIZE - (line->y2 - Y_SIZE);
+                line_delta->y2 = -line_delta->y2;
+                line->color = RANDOM_COLOR();
+            }
+        }
+
+        // draw lines until a key is pressed
+        void draw_lines() {
+            line_s line, line_delta, line_degree, line_history[HISTORY_SIZE];
+            int history_index;
+
+            // randomize starting values
+            line.x1 = rand() % X_SIZE;
+            line.y1 = rand() % Y_SIZE;
+            line.x2 = rand() % X_SIZE;
+            line.y2 = rand() % Y_SIZE;
+            line.color = RANDOM_COLOR();
+
+            line_delta.x1 = STEP;
+            line_delta.y1 = STEP;
+            line_delta.x2 = STEP;
+            line_delta.y2 = STEP;
+
+            line_degree.x1 = rand() % MAX_SIN;
+            line_degree.y1 = rand() % MAX_SIN;
+            line_degree.x2 = rand() % MAX_SIN;
+            line_degree.y2 = rand() % MAX_SIN;
+            history_index = 0;
+
+            // loop until key-press
+            while (!kbhit()) {
+                // get next line
+                next_line(&line, &line_delta, &line_degree);
+
+                // draw line
+                draw_line(line.x1, line.y1, line.x2, line.y2, line.color);
+
+                // remove from history
+                draw_line(line_history[history_index].x1, line_history[history_index].y1,
+                          line_history[history_index].x2, line_history[history_index].y2,
+                          COLOR_BG);
+
+                // add to history
+                line_history[history_index++] = line;
+                if (history_index >= HISTORY_SIZE) history_index = 0;
+            }
+            cgetc();                            // consume key-press
+        }
+
+        int main(void) {
+            unsigned char bg_color, border_color;
+
+            // setup multi-color bitmap
+            setup_bitmap_multi();
+
+            // persist background and border color
+            bg_color = bgcolor(COLOR_BG);
+            border_color = bordercolor(COLOR_BG);
+
+            // clear screen
+            clrscr();
+
+            // main loop
+            draw_lines();
+
+            // restore background and border color
+            bgcolor(bg_color);
+            bordercolor(border_color);
+
+            return EXIT_SUCCESS;
+        }
+      #+END_SRC
+
+***** Build and Run
+
+      #+BEGIN_SRC sh :dir (file-name-directory buffer-file-name)
+        cd qix-lines-multi-color
+        make clean && make && x64sc qixlinesmc.prg &
+      #+END_SRC
+* README.org
+
+  #+BEGIN_SRC org :tangle README.org
+    ,* cc65 Programs for MS-DOS
+
+      See the "Build and Run" sections of [[file:msdos-cc65.org][msdos-cc65.org]]
+      to see how to build, clean, and run these applications using the VICE
+      emulator. In general you follow these steps:
+
+      Build with =make=.
+
+      Clean with =make clean=.
+
+      Run with =dosbox NAME.EXE=.
+
+      All files are generated from [[file:msdos-cc65.org][msdos-cc65.org]] using
+      Emacs' org-mode literate programming system to "tangle" them.
+
+      root42's "Let's Code: MS-DOS" series instrumental in creating these programs.
+
+      <<copyright>>
+
+      License: [[file:LICENSE][BSD 2-Clause License]]
+
+    ,*** [[hello-world][Hello World]]
+
+        Just prints "HELLO WORLD!".
+
+    ,*** [[system-info][System Info]]
+
+        Displays some basic system information.
+
+    ,*** [[qix-lines][Qix Lines]]
+
+        Draws lines on the screen like the game Qix.
+
+        ,#+NAME: Qix Lines Video
+        [[file:qix-lines/qixlines.mkv][file:qix-lines/qixlines.gif]]
+
+    ,*** [[qix-lines-multi-color][Qix Lines (Multi Color)]]
+
+        Attempt at a multi-colored version of Qix Lines, but it is both slow and
+        not working ATM.
+  #+END_SRC
+
+* LICENSE
+
+  #+BEGIN_SRC text :tangle LICENSE
+    <<license-header>>
+  #+END_SRC
