@@ -4,9 +4,9 @@
 
 #include <conio.h>                      // clrscr getch
 #include <dos.h>                        // int86 outp
-#include <math.h>                       // sin
-#include <stdio.h>                      // printf sprintf
-#include <stdlib.h>                     // EXIT_SUCCESS EXIT_FAILURE malloc
+#include <math.h>                       // M_PI sin
+#include <stdio.h>                      // printf
+#include <stdlib.h>                     // EXIT_SUCCESS EXIT_FAILURE malloc abs
 #include <sys/nearptr.h>                // __djgpp_nearptr_enable __djgpp_nearptr_disable
 
 //#include "sleep.h"
@@ -21,7 +21,7 @@
 #define SCREEN_WIDTH 320                // width in pixels of VGA mode 0x13
 #define SCREEN_HEIGHT 200               // height in pixels of VGA mode 0x13
 #define NUM_COLORS 256                  // number of colors in VGA mode
-#define CLOCK_HZ 18.2                   // system clock HZ
+//#define CLOCK_HZ 18.2                   // system clock HZ
 
 #define COLOR_BG 0
 #define COLOR_FG 1
@@ -36,7 +36,6 @@
 typedef unsigned char byte;
 typedef unsigned short ushort;
 
-// line
 typedef struct {
     int x1;
     int y1;
@@ -45,7 +44,6 @@ typedef struct {
     byte color;
 } line_s;
 
-// globals
 byte* vga = (byte*)VIDEO_MEMORY;
 ushort* clk = (ushort*)SYSTEM_CLOCK;
 
@@ -57,7 +55,7 @@ void set_mode(byte mode) {
     int86(VIDEO_INT, &regs, &regs);
 }
 
-void linecpy(line_s *target_line, line_s *source_line) {
+void linecpy(line_s* target_line, line_s* source_line) {
     target_line->x1 = source_line->x1;
     target_line->y1 = source_line->y1;
     target_line->x2 = source_line->x2;
@@ -73,24 +71,25 @@ void draw_pixel(int x, int y, byte color) {
     vga[offset] = color;
 }
 
-void draw_line(line_s *line) {
+void draw_line_long_x(line_s* line) {
     int x1, y1, x2, y2, dx, dy, x, y;
 
     // reverse line if x1 > x2
-    if (line->x1 < line->x2) {
-        x1 = line->x1;
-        y1 = line->y1;
-        x2 = line->x2;
-        y2 = line->y2;
-    } else {
+    if (line->x1 > line->x2) {
         x1 = line->x2;
         y1 = line->y2;
         x2 = line->x1;
         y2 = line->y1;
+    } else {
+        x1 = line->x1;
+        y1 = line->y1;
+        x2 = line->x2;
+        y2 = line->y2;
     }
 
     dx = x2 - x1;
     dy = y2 - y1;
+
     for (x = x1; x <= x2; x++) {
         // prevent divide by 0 error
         if (dx == 0) {
@@ -98,7 +97,53 @@ void draw_line(line_s *line) {
         } else {
             y = y1 + dy * (x - x1) / dx;
         }
-        draw_pixel(x, y, line->color);
+        if (y >= 0 && y < SCREEN_HEIGHT) {
+            draw_pixel(x, y, line->color);
+        }
+    }
+}
+
+void draw_line_long_y(line_s* line) {
+    int x1, y1, x2, y2, dx, dy, x, y;
+
+    // reverse line if y1 > y2
+    if (line->y1 > line->y2) {
+        x1 = line->x2;
+        y1 = line->y2;
+        x2 = line->x1;
+        y2 = line->y1;
+    } else {
+        x1 = line->x1;
+        y1 = line->y1;
+        x2 = line->x2;
+        y2 = line->y2;
+    }
+
+    dx = x2 - x1;
+    dy = y2 - y1;
+
+    for (y = y1; y <= y2; y++) {
+        // prevent divide by 0 error
+        if (dy == 0) {
+            x = x1 + dx * (y - y1);
+        } else {
+            x = x1 + dx * (y - y1) / dy;
+        }
+        if (x >= 0 && x < SCREEN_WIDTH) {
+            draw_pixel(x, y, line->color);
+        }
+    }
+}
+
+void draw_line(line_s* line) {
+    // it looks better if we single step over the longer distance
+    //if (abs(line->x2 - line->x1) > abs(line->y2 - line->y1)) {
+    //if (((line->x2 - line->x1) > 0 ? (line->x2 - line->x1) : (line->x1 - line->x2)) >
+    //    ((line->y2 - line->y1) > 0 ? (line->y2 - line->y1) : (line->y1 - line->y2))) {
+    if (rand() % 2 > 0) {
+        draw_line_long_x(line);
+    } else {
+        draw_line_long_y(line);
     }
 }
 
@@ -109,7 +154,11 @@ int next_degree(int degree) {
     return d;
 }
 
-void next_line(line_s *line, line_s *line_delta, line_s *line_degree) {
+double degree_to_radians(int degree) {
+    return degree * M_PI / 180.0;
+}
+
+void next_line(line_s* line, line_s* line_delta, line_s* line_degree) {
     // randomly add to the degrees
     line_degree->x1 = next_degree(line_degree->x1);
     line_degree->y1 = next_degree(line_degree->y1);
@@ -117,10 +166,10 @@ void next_line(line_s *line, line_s *line_delta, line_s *line_degree) {
     line_degree->y2 = next_degree(line_degree->y2);
 
     // add using sin modified by a delta for each coordinate dimension
-    line->x1 += (int)(line_delta->x1 * sin(line_degree->x1));
-    line->y1 += (int)(line_delta->y1 * sin(line_degree->y1));
-    line->x2 += (int)(line_delta->x2 * sin(line_degree->x2));
-    line->y2 += (int)(line_delta->y2 * sin(line_degree->y2));
+    line->x1 += (int)(line_delta->x1 * sin(degree_to_radians(line_degree->x1)));
+    line->y1 += (int)(line_delta->y1 * sin(degree_to_radians(line_degree->y1)));
+    line->x2 += (int)(line_delta->x2 * sin(degree_to_radians(line_degree->x2)));
+    line->y2 += (int)(line_delta->y2 * sin(degree_to_radians(line_degree->y2)));
 
     // if any coordinates are out of range, reverse their direction and change color
     if (line->x1 < 0) {
@@ -211,7 +260,7 @@ void draw_lines() {
         if (history_index >= HISTORY_SIZE) history_index = 0;
 
         // pause to slow down draw speed
-        for (t = 0; t < 100000; t++) {}
+        for (t = 0; t < 1000000; t++) {}
     }
 
     // consume key-press
