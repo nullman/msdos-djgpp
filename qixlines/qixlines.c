@@ -2,14 +2,12 @@
  * QIX Lines
  */
 
-#include <conio.h>                      // clrscr getch
-#include <dos.h>                        // int86 outp
-#include <math.h>                       // M_PI sin
-#include <stdio.h>                      // printf
-#include <stdlib.h>                     // EXIT_SUCCESS EXIT_FAILURE malloc abs
-#include <sys/nearptr.h>                // __djgpp_nearptr_enable __djgpp_nearptr_disable
-
-//#include "sleep.h"
+#include <conio.h>
+#include <dos.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/nearptr.h>
 
 #define VIDEO_INT 0x10                  // BIOS video interrupt
 #define SET_MODE 0x00                   // BIOS function to set video mode
@@ -21,7 +19,6 @@
 #define SCREEN_WIDTH 320                // width in pixels of VGA mode 0x13
 #define SCREEN_HEIGHT 200               // height in pixels of VGA mode 0x13
 #define NUM_COLORS 256                  // number of colors in VGA mode
-//#define CLOCK_HZ 18.2                   // system clock HZ
 
 #define COLOR_BG 0
 #define COLOR_FG 1
@@ -137,15 +134,48 @@ void draw_line_long_y(line_s* line) {
 
 void draw_line(line_s* line) {
     // it looks better if we single step over the longer distance
-    //if (abs(line->x2 - line->x1) > abs(line->y2 - line->y1)) {
-    //if (((line->x2 - line->x1) > 0 ? (line->x2 - line->x1) : (line->x1 - line->x2)) >
-    //    ((line->y2 - line->y1) > 0 ? (line->y2 - line->y1) : (line->y1 - line->y2))) {
-    if (rand() % 2 > 0) {
+    if (abs(line->x2 - line->x1) > abs(line->y2 - line->y1)) {
         draw_line_long_x(line);
     } else {
         draw_line_long_y(line);
     }
 }
+
+/* void draw_line(line_s* line) { */
+/*     int x1, y1, x2, y2, color; */
+/*     int x, y, dx, dy, sx, sy, e1, e2; */
+
+/*     x1 = line->x1; */
+/*     y1 = line->y1; */
+/*     x2 = line->x2; */
+/*     y2 = line->y2; */
+/*     color = line->color; */
+
+/*     dx = abs(x2 - x1); */
+/*     sx = (x1 < x2) ? 1 : -1; */
+/*     dy = abs(y2 - y1); */
+/*     sy = (y1 < y2) ? 1 : -1; */
+/*     e1 = dx + dy; */
+
+/*     x = x1; */
+/*     y = y1; */
+
+/*     while (1) { */
+/*         draw_pixel(x, y, color); */
+/*         if (x == x2 && y == y2) break; */
+/*         e2 = 2 * e1; */
+/*         if (e2 >= dy) { */
+/*             if (x == x2) break; */
+/*             e1 = e1 + dy; */
+/*             x = x + sx; */
+/*         } */
+/*         if (e2 <= dx) { */
+/*             if (y == y2) break; */
+/*             e1 = e1 + dx; */
+/*             y = y + sy; */
+/*         } */
+/*     } */
+/* } */
 
 int next_degree(int degree) {
     // add randomly to the degree
@@ -154,7 +184,7 @@ int next_degree(int degree) {
     return d;
 }
 
-double degree_to_radians(int degree) {
+double degree_to_radian(int degree) {
     return degree * M_PI / 180.0;
 }
 
@@ -166,10 +196,10 @@ void next_line(line_s* line, line_s* line_delta, line_s* line_degree) {
     line_degree->y2 = next_degree(line_degree->y2);
 
     // add using sin modified by a delta for each coordinate dimension
-    line->x1 += (int)(line_delta->x1 * sin(degree_to_radians(line_degree->x1)));
-    line->y1 += (int)(line_delta->y1 * sin(degree_to_radians(line_degree->y1)));
-    line->x2 += (int)(line_delta->x2 * sin(degree_to_radians(line_degree->x2)));
-    line->y2 += (int)(line_delta->y2 * sin(degree_to_radians(line_degree->y2)));
+    line->x1 += (int)(line_delta->x1 * sin(degree_to_radian(line_degree->x1)));
+    line->y1 += (int)(line_delta->y1 * sin(degree_to_radian(line_degree->y1)));
+    line->x2 += (int)(line_delta->x2 * sin(degree_to_radian(line_degree->x2)));
+    line->y2 += (int)(line_delta->y2 * sin(degree_to_radian(line_degree->y2)));
 
     // if any coordinates are out of range, reverse their direction and change color
     if (line->x1 < 0) {
