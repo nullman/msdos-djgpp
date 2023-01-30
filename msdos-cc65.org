@@ -8,7 +8,7 @@
   #+LANGUAGE: en
   #+PROPERTY: header-args :tangle no :noweb yes :padline yes :comments no :results silent :dir /tmp :mkdirp yes
   #+STARTUP: noindent odd overview
-  #+TIMESTAMP: <2023-01-28 23:12 (kyle)>
+  #+TIMESTAMP: <2023-01-30 15:58 (kyle)>
 
 * Constants
 
@@ -502,55 +502,6 @@
 
 * Shared
 
-*** Sleep
-
-***** sleep.h
-
-      #+NAME: sleep_h
-      #+BEGIN_SRC c
-        #ifndef _SLEEP_H
-        #define _SLEEP_H
-
-        #include <dpmi.h>
-        #include <errno.h>
-        #include <time.h>
-
-        void sleep(unsigned int msec);
-
-        #endif
-      #+END_SRC
-
-***** sleep.c
-
-      #+NAME: sleep_c
-      #+BEGIN_SRC c
-        #include "sleep.h"
-
-        static int have_yield = -1;
-
-        void sleep_init(void) {
-            if (have_yield < 0) {
-                errno = 0;
-                __dpmi_yield();
-                have_yield = errno ? 0 : 1;
-            }
-        }
-
-        void sleep(unsigned int msec) {
-            uclock_t sleep_time;
-
-            sleep_init();
-
-            sleep_time = uclock() + msec * UCLOCKS_PER_SEC / 1000;
-
-            if (have_yield) {
-                while (uclock() < sleep_time) __dpmi_yield();
-            } else {
-                while (uclock() < sleep_time) __asm__ volatile ("hlt");
-            }
-        }
-      #+END_SRC
-
 * Programs
 
 *** Hello World
@@ -641,8 +592,8 @@
         #define VGA_256_COLOR_MODE 0x13         // use to set 256 VGA color mode
         #define TEXT_MODE 0x03                  // use to set text mode
         #define PIXEL_PLOT 0x0C                 // BIOS function to plot a pixel
-        #define VIDEO_MEMORY 0xA0000;           // start of video memory
-        #define SYSTEM_CLOCK 0x046C;            // system clock memory location
+        #define VIDEO_MEMORY 0xA0000            // start of video memory
+        #define SYSTEM_CLOCK 0x046C             // system clock memory location
         #define SCREEN_WIDTH 320                // width in pixels of VGA mode 0x13
         #define SCREEN_HEIGHT 200               // height in pixels of VGA mode 0x13
         #define NUM_COLORS 256                  // number of colors in VGA mode
@@ -669,7 +620,7 @@
             ushort ticks;
             ushort ts;
 
-            ticks = msec * CLOCK_HZ / 1000;
+            ticks = msec * CLOCK_HZ / 1000.0;
             ts = *clk;
 
             while (*clk - ts < ticks) {
@@ -677,97 +628,23 @@
             }
         }
 
-        void draw_pixel(int x, int y, byte color) {
-            int offset;
+        void draw_pixel(ushort x, ushort y, byte color) {
+            ushort offset;
 
             offset = y * SCREEN_WIDTH + x;
             //offset = (y<<8) + (y<<6) + x;       // faster, but harder to understand
             vga[offset] = color;
         }
 
-        /* void draw_line_long_x(int x1, int y1, int x2, int y2, byte color) { */
-        /*     int x, y, dx, dy, yi, d; */
+        void draw_line(ushort x1, ushort y1, ushort x2, ushort y2, byte color) {
+            ushort x, y;
+            int dx, dy, sx, sy, e1, e2;
 
-        /*     // reverse line if x1 > x2 */
-        /*     if (x1 > x2) { */
-        /*         x = x1; */
-        /*         x1 = x2; */
-        /*         x2 = x; */
-        /*         y = y1; */
-        /*         y1 = y2; */
-        /*         y2 = y; */
-        /*     } */
-
-        /*     dx = x2 - x1; */
-        /*     dy = y2 - y1; */
-        /*     yi = 1; */
-        /*     if (dy < 0) { */
-        /*         yi = -1; */
-        /*         dy = -dy; */
-        /*     } */
-        /*     d = 2 * dy - dx; */
-        /*     y = y1; */
-
-        /*     for (x = x1; x <= x2; x++) { */
-        /*         draw_pixel(x, y, color); */
-        /*         if (d > 0) { */
-        /*             y = y + yi; */
-        /*             d = d + 2 * (dy - dx); */
-        /*         } else { */
-        /*             d = d + 2 * dy; */
-        /*         } */
-        /*     } */
-        /* } */
-
-        /* void draw_line_long_y(int x1, int y1, int x2, int y2, byte color) { */
-        /*     int x, y, dx, dy, xi, d; */
-
-        /*     // reverse line if y1 > y2 */
-        /*     if (y1 > y2) { */
-        /*         x = x1; */
-        /*         x1 = x2; */
-        /*         x2 = x; */
-        /*         y = y1; */
-        /*         y1 = y2; */
-        /*         y2 = y; */
-        /*     } */
-
-        /*     dx = x2 - x1; */
-        /*     dy = y2 - y1; */
-        /*     xi = 1; */
-        /*     if (dx < 0) { */
-        /*         xi = -1; */
-        /*         dx = -dx; */
-        /*     } */
-        /*     d = 2 * dx - dy; */
-        /*     x = x1; */
-
-        /*     for (y = y1; y <= y2; y++) { */
-        /*         draw_pixel(x, y, color); */
-        /*         if (d > 0) { */
-        /*             x = x + xi; */
-        /*             d = d + 2 * (dx - dy); */
-        /*         } else { */
-        /*             d = d + 2 * dx; */
-        /*         } */
-        /*     } */
-        /* } */
-
-        /* void draw_line(int x1, int y1, int x2, int y2, byte color) { */
-        /*     // it looks better if we single step over the longer distance */
-        /*     if (abs(x2 - x1) > abs(y2 - y1)) { */
-        /*         draw_line_long_x(x1, y1, x2, y2, color); */
-        /*     } else { */
-        /*         draw_line_long_y(x1, y1, x2, y2, color); */
-        /*     } */
-        /* } */
-
-        void draw_line(int x1, int y1, int x2, int y2, byte color) {
-            int x, y, dx, dy, sx, sy, e1, e2;
-
-            dx = abs(x2 - x1);
+            dx = x2 - x1;
+            if (dx < 0) dx = -dx;
             sx = (x1 < x2) ? 1 : -1;
-            dy = abs(y2 - y1);
+            dy = y2 - y1;
+            if (dy > 0) dy = -dy;
             sy = (y1 < y2) ? 1 : -1;
             e1 = dx + dy;
 
@@ -780,24 +657,23 @@
                 e2 = 2 * e1;
                 if (e2 >= dy) {
                     if (x == x2) break;
-                    e1 = e1 + dy;
-                    x = x + sx;
+                    e1 += dy;
+                    x += sx;
                 }
                 if (e2 <= dx) {
                     if (y == y2) break;
-                    e1 = e1 + dx;
-                    y = y + sy;
+                    e1 += dx;
+                    y += sy;
                 }
             }
         }
 
-        double degrees_to_radians(int degrees) {
-            return degrees * M_PI / 180.0;
+        double degrees_to_radians(ushort degree) {
+            return degree * M_PI / 180.0;
         }
 
-        // draw lines until a key is pressed
         void draw_lines() {
-            int x1, y1, x2, y2, deg, t;
+            ushort x1, y1, x2, y2, deg;
             byte color;
 
             x1 = 0;
@@ -806,24 +682,21 @@
             y2 = 0;
             color = 1;
 
-            // loop until key-press
-            while (!kbhit()) {
-                for (deg = 0; deg <= 45; deg += 3) {
-                    // draw line
-                    draw_line(x1, y1, x2, y2, color);
-                    //draw_line(10, 10, 310, 190, color);
-                    //draw_line(10, 10, 20, 20, color);
+            for (deg = 0; deg <= 90; deg += 3) {
+                // draw line
+                draw_line(x1, y1, x2, y2, color);
 
-                    // add degrees until 90
-                    y2 = (int)((SCREEN_HEIGHT - 1) * sin(degrees_to_radians(deg)));
-
-                    // pause to slow down draw speed
-                    for (t = 0; t < 1000000; t++) {}
-                }
+                // add degrees until 90
+                y2 = (ushort)((SCREEN_HEIGHT - 1) * sin(degrees_to_radians(deg)));
             }
+            y2 = SCREEN_HEIGHT - 1;
+            for (deg = 90; deg <= 180; deg += 3) {
+                // draw line
+                draw_line(x1, y1, x2, y2, color);
 
-            // consume key-press
-            getch();
+                // add degrees until 90
+                x2 = (ushort)((SCREEN_WIDTH - 1) * sin(degrees_to_radians(deg)));
+            }
         }
 
         int main(void) {
@@ -843,6 +716,9 @@
 
             // main loop
             draw_lines();
+
+            // wait for key-press
+            getch();
 
             // set text mode and clear screen
             set_mode(TEXT_MODE);
@@ -911,11 +787,12 @@
         #define VGA_256_COLOR_MODE 0x13         // use to set 256 VGA color mode
         #define TEXT_MODE 0x03                  // use to set text mode
         #define PIXEL_PLOT 0x0C                 // BIOS function to plot a pixel
-        #define VIDEO_MEMORY 0xA0000;           // start of video memory
-        #define SYSTEM_CLOCK 0x046C;            // system clock memory location
+        #define VIDEO_MEMORY 0xA0000            // start of video memory
+        #define SYSTEM_CLOCK 0x046C             // system clock memory location
         #define SCREEN_WIDTH 320                // width in pixels of VGA mode 0x13
         #define SCREEN_HEIGHT 200               // height in pixels of VGA mode 0x13
         #define NUM_COLORS 256                  // number of colors in VGA mode
+        #define CLOCK_HZ 18.2                   // system clock HZ
 
         #define COLOR_BG 0
         #define COLOR_FG 1
@@ -931,10 +808,10 @@
         typedef unsigned short ushort;
 
         typedef struct {
-            int x1;
-            int y1;
-            int x2;
-            int y2;
+            short x1;
+            short y1;
+            short x2;
+            short y2;
             byte color;
         } line_s;
 
@@ -949,6 +826,18 @@
             int86(VIDEO_INT, &regs, &regs);
         }
 
+        void sleep(int msec) {
+            ushort ticks;
+            ushort ts;
+
+            ticks = msec * CLOCK_HZ / 1000;
+            ts = *clk;
+
+            while (*clk - ts < ticks) {
+                ,*clk = *clk;                    // force compiler to properly loop
+            }
+        }
+
         void linecpy(line_s* target_line, line_s* source_line) {
             target_line->x1 = source_line->x1;
             target_line->y1 = source_line->y1;
@@ -957,131 +846,61 @@
             target_line->color = source_line->color;
         }
 
-        void draw_pixel(int x, int y, byte color) {
-            int offset;
+        void draw_pixel(ushort x, ushort y, byte color) {
+            ushort offset;
 
             offset = y * SCREEN_WIDTH + x;
             //offset = (y<<8) + (y<<6) + x;       // faster, but harder to understand
             vga[offset] = color;
         }
 
-        void draw_line_long_x(line_s* line) {
-            int x1, y1, x2, y2, dx, dy, x, y;
-
-            // reverse line if x1 > x2
-            if (line->x1 > line->x2) {
-                x1 = line->x2;
-                y1 = line->y2;
-                x2 = line->x1;
-                y2 = line->y1;
-            } else {
-                x1 = line->x1;
-                y1 = line->y1;
-                x2 = line->x2;
-                y2 = line->y2;
-            }
-
-            dx = x2 - x1;
-            dy = y2 - y1;
-
-            for (x = x1; x <= x2; x++) {
-                // prevent divide by 0 error
-                if (dx == 0) {
-                    y = y1 + dy * (x - x1);
-                } else {
-                    y = y1 + dy * (x - x1) / dx;
-                }
-                if (y >= 0 && y < SCREEN_HEIGHT) {
-                    draw_pixel(x, y, line->color);
-                }
-            }
-        }
-
-        void draw_line_long_y(line_s* line) {
-            int x1, y1, x2, y2, dx, dy, x, y;
-
-            // reverse line if y1 > y2
-            if (line->y1 > line->y2) {
-                x1 = line->x2;
-                y1 = line->y2;
-                x2 = line->x1;
-                y2 = line->y1;
-            } else {
-                x1 = line->x1;
-                y1 = line->y1;
-                x2 = line->x2;
-                y2 = line->y2;
-            }
-
-            dx = x2 - x1;
-            dy = y2 - y1;
-
-            for (y = y1; y <= y2; y++) {
-                // prevent divide by 0 error
-                if (dy == 0) {
-                    x = x1 + dx * (y - y1);
-                } else {
-                    x = x1 + dx * (y - y1) / dy;
-                }
-                if (x >= 0 && x < SCREEN_WIDTH) {
-                    draw_pixel(x, y, line->color);
-                }
-            }
-        }
-
         void draw_line(line_s* line) {
-            // it looks better if we single step over the longer distance
-            if (abs(line->x2 - line->x1) > abs(line->y2 - line->y1)) {
-                draw_line_long_x(line);
-            } else {
-                draw_line_long_y(line);
+            ushort x1, y1, x2, y2, x, y;
+            byte color;
+            int dx, dy, sx, sy, e1, e2;
+
+            x1 = line->x1;
+            y1 = line->y1;
+            x2 = line->x2;
+            y2 = line->y2;
+            color = line->color;
+
+            dx = x2 - x1;
+            if (dx < 0) dx = -dx;
+            sx = (x1 < x2) ? 1 : -1;
+            dy = y2 - y1;
+            if (dy > 0) dy = -dy;
+            sy = (y1 < y2) ? 1 : -1;
+            e1 = dx + dy;
+
+            x = x1;
+            y = y1;
+
+            while (1) {
+                draw_pixel(x, y, color);
+                if (x == x2 && y == y2) break;
+                e2 = 2 * e1;
+                if (e2 >= dy) {
+                    if (x == x2) break;
+                    e1 += dy;
+                    x += sx;
+                }
+                if (e2 <= dx) {
+                    if (y == y2) break;
+                    e1 += dx;
+                    y += sy;
+                }
             }
         }
 
-        /* void draw_line(line_s* line) { */
-        /*     int x1, y1, x2, y2, color; */
-        /*     int x, y, dx, dy, sx, sy, e1, e2; */
-
-        /*     x1 = line->x1; */
-        /*     y1 = line->y1; */
-        /*     x2 = line->x2; */
-        /*     y2 = line->y2; */
-        /*     color = line->color; */
-
-        /*     dx = abs(x2 - x1); */
-        /*     sx = (x1 < x2) ? 1 : -1; */
-        /*     dy = abs(y2 - y1); */
-        /*     sy = (y1 < y2) ? 1 : -1; */
-        /*     e1 = dx + dy; */
-
-        /*     x = x1; */
-        /*     y = y1; */
-
-        /*     while (1) { */
-        /*         draw_pixel(x, y, color); */
-        /*         if (x == x2 && y == y2) break; */
-        /*         e2 = 2 * e1; */
-        /*         if (e2 >= dy) { */
-        /*             if (x == x2) break; */
-        /*             e1 = e1 + dy; */
-        /*             x = x + sx; */
-        /*         } */
-        /*         if (e2 <= dx) { */
-        /*             if (y == y2) break; */
-        /*             e1 = e1 + dx; */
-        /*             y = y + sy; */
-        /*         } */
-        /*     } */
-        /* } */
-
-        int next_degree(int degree) {
+        ushort next_degree(ushort degree) {
             // add randomly to the degree
-            int d = degree + STEP + rand() % (STEP_RANGE * 2 + 1) - STEP_RANGE;
+            ushort d = degree + STEP + rand() % (STEP_RANGE * 2 + 1) - STEP_RANGE;
             if (d >= MAX_SIN) d = d - MAX_SIN;
             return d;
         }
 
-        double degree_to_radian(int degree) {
+        double degrees_to_radians(ushort degree) {
             return degree * M_PI / 180.0;
         }
 
@@ -1093,10 +912,10 @@
             line_degree->y2 = next_degree(line_degree->y2);
 
             // add using sin modified by a delta for each coordinate dimension
-            line->x1 += (int)(line_delta->x1 * sin(degree_to_radian(line_degree->x1)));
-            line->y1 += (int)(line_delta->y1 * sin(degree_to_radian(line_degree->y1)));
-            line->x2 += (int)(line_delta->x2 * sin(degree_to_radian(line_degree->x2)));
-            line->y2 += (int)(line_delta->y2 * sin(degree_to_radian(line_degree->y2)));
+            line->x1 += (ushort)(line_delta->x1 * sin(degrees_to_radians(line_degree->x1)));
+            line->y1 += (ushort)(line_delta->y1 * sin(degrees_to_radians(line_degree->y1)));
+            line->x2 += (ushort)(line_delta->x2 * sin(degrees_to_radians(line_degree->x2)));
+            line->y2 += (ushort)(line_delta->y2 * sin(degrees_to_radians(line_degree->y2)));
 
             // if any coordinates are out of range, reverse their direction and change color
             if (line->x1 < 0) {
@@ -1145,7 +964,6 @@
         void draw_lines() {
             line_s line, line_delta, line_degree, line_history[HISTORY_SIZE];
             ushort i, history_index;
-            int t;
 
             // randomize starting values
             line.x1 = rand() % SCREEN_WIDTH;
@@ -1187,7 +1005,7 @@
                 if (history_index >= HISTORY_SIZE) history_index = 0;
 
                 // pause to slow down draw speed
-                for (t = 0; t < 1000000; t++) {}
+                sleep(100);
             }
 
             // consume key-press
