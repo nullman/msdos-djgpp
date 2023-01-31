@@ -13,7 +13,8 @@
   All files are generated from [[file:msdos-cc65.org][msdos-cc65.org]] using
   Emacs' org-mode literate programming system to "tangle" them.
 
-  root42's "Let's Code: MS-DOS" series instrumental in creating these programs.
+  root42's "Let's Code: MS-DOS" series was instrumental in creating these
+  programs.
 
   Copyright © 2023 Kyle W T Sherman
 
