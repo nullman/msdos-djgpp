@@ -1,8 +1,8 @@
 * cc65 Programs for MS-DOS
 
-  See the "Build and Run" sections of [[file:msdos-cc65.org][msdos-cc65.org]]
-  to see how to build, clean, and run these applications using the VICE
-  emulator. In general you follow these steps:
+  See the "Build and Run" sections of [[file:msdos-cc65.org][msdos-cc65.org]] to see how to build, clean,
+  and run these applications using the DOSBox emulator. In general you follow
+  these steps:
 
   Build with =make=.
 
@@ -10,8 +10,8 @@
 
   Run with =dosbox NAME.EXE=.
 
-  All files are generated from [[file:msdos-cc65.org][msdos-cc65.org]] using
-  Emacs' org-mode literate programming system to "tangle" them.
+  All files are generated from [[file:msdos-cc65.org][msdos-cc65.org]] using Emacs' org-mode literate
+  programming system to "tangle" them.
 
   root42's "Let's Code: MS-DOS" series was instrumental in creating these
   programs.
@@ -20,22 +20,13 @@
 
   License: [[file:LICENSE][BSD 2-Clause License]]
 
-*** [[hello-world][Hello World]]
+*** [[hello][Hello World]]
 
-    Just prints "HELLO WORLD!".
+    Just prints "Hello World!".
 
-*** [[system-info][System Info]]
-
-    Displays some basic system information.
-
-*** [[qix-lines][Qix Lines]]
+*** [[qixlines][Qix Lines]]
 
     Draws lines on the screen like the game Qix.
 
     #+NAME: Qix Lines Video
-    [[file:qix-lines/qixlines.mkv][file:qix-lines/qixlines.gif]]
-
-*** [[qix-lines-multi-color][Qix Lines (Multi Color)]]
-
-    Attempt at a multi-colored version of Qix Lines, but it is both slow and
-    not working ATM.
+    [[file:qixlines/qixlines.mkv][file:qix-lines/qixlines.gif]]

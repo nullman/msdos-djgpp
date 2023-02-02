@@ -31,8 +31,8 @@
 typedef unsigned char byte;
 typedef unsigned short ushort;
 
-byte* vga = (byte*)VIDEO_MEMORY;
-ushort* clk = (ushort*)SYSTEM_CLOCK;
+byte *vga = (byte *)VIDEO_MEMORY;
+ushort *clk = (ushort *)SYSTEM_CLOCK;
 
 void set_mode(byte mode) {
     union REGS regs;
@@ -78,7 +78,9 @@ void draw_line(ushort x1, ushort y1, ushort x2, ushort y2, byte color) {
     y = y1;
 
     while (1) {
-        draw_pixel(x, y, color);
+        if (x < SCREEN_WIDTH && y < SCREEN_HEIGHT) {
+            draw_pixel(x, y, color);
+        }
         if (x == x2 && y == y2) break;
         e2 = 2 * e1;
         if (e2 >= dy) {
@@ -108,7 +110,7 @@ void draw_lines() {
     y2 = 0;
     color = 1;
 
-    for (deg = 0; deg <= 90; deg += 3) {
+    for (deg = 0; deg <= 90; deg += 1) {
         // draw line
         draw_line(x1, y1, x2, y2, color);
 
@@ -116,7 +118,7 @@ void draw_lines() {
         y2 = (ushort)((SCREEN_HEIGHT - 1) * sin(degrees_to_radians(deg)));
     }
     y2 = SCREEN_HEIGHT - 1;
-    for (deg = 90; deg <= 180; deg += 3) {
+    for (deg = 90; deg <= 180; deg += 1) {
         // draw line
         draw_line(x1, y1, x2, y2, color);
 
@@ -132,7 +134,7 @@ int main(void) {
     }
 
     vga += __djgpp_conventional_base;
-    clk = (void*)clk + __djgpp_conventional_base;
+    clk = (void *)clk + __djgpp_conventional_base;
 
     // seed number generator
     srand(*clk);

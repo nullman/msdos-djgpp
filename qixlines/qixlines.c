@@ -42,8 +42,8 @@ typedef struct {
     byte color;
 } line_s;
 
-byte* vga = (byte*)VIDEO_MEMORY;
-ushort* clk = (ushort*)SYSTEM_CLOCK;
+byte *vga = (byte *)VIDEO_MEMORY;
+ushort *clk = (ushort *)SYSTEM_CLOCK;
 
 void set_mode(byte mode) {
     union REGS regs;
@@ -65,7 +65,7 @@ void sleep(int msec) {
     }
 }
 
-void linecpy(line_s* target_line, line_s* source_line) {
+void linecpy(line_s *target_line, line_s *source_line) {
     target_line->x1 = source_line->x1;
     target_line->y1 = source_line->y1;
     target_line->x2 = source_line->x2;
@@ -81,7 +81,7 @@ void draw_pixel(ushort x, ushort y, byte color) {
     vga[offset] = color;
 }
 
-void draw_line(line_s* line) {
+void draw_line(line_s *line) {
     ushort x1, y1, x2, y2, x, y;
     byte color;
     int dx, dy, sx, sy, e1, e2;
@@ -104,7 +104,9 @@ void draw_line(line_s* line) {
     y = y1;
 
     while (1) {
-        draw_pixel(x, y, color);
+        if (x < SCREEN_WIDTH && y < SCREEN_HEIGHT) {
+            draw_pixel(x, y, color);
+        }
         if (x == x2 && y == y2) break;
         e2 = 2 * e1;
         if (e2 >= dy) {
@@ -131,7 +133,7 @@ double degrees_to_radians(ushort degree) {
     return degree * M_PI / 180.0;
 }
 
-void next_line(line_s* line, line_s* line_delta, line_s* line_degree) {
+void next_line(line_s *line, line_s *line_delta, line_s *line_degree) {
     // randomly add to the degrees
     line_degree->x1 = next_degree(line_degree->x1);
     line_degree->y1 = next_degree(line_degree->y1);
@@ -239,14 +241,14 @@ void draw_lines() {
     getch();
 }
 
-int main(void) {
+int main(int argc, char *argv[]) {
     if (__djgpp_nearptr_enable() == 0) {
         printf("Could not get access to first 640K of memory\n");
         exit(EXIT_FAILURE);
     }
 
     vga += __djgpp_conventional_base;
-    clk = (void*)clk + __djgpp_conventional_base;
+    clk = (void *)clk + __djgpp_conventional_base;
 
     // seed number generator
     srand(*clk);

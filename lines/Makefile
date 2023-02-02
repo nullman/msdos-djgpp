@@ -1,7 +1,6 @@
 .RECIPEPREFIX = >
 
 CXX = i686-pc-msdosdjgpp-gcc
-#CXXFLAGS = -m16 -Wall
 CXXFLAGS = -m32 -Wall
 
 all: lines

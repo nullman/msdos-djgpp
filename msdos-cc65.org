@@ -8,7 +8,7 @@
   #+LANGUAGE: en
   #+PROPERTY: header-args :tangle no :noweb yes :padline yes :comments no :results silent :dir /tmp :mkdirp yes
   #+STARTUP: noindent odd overview
-  #+TIMESTAMP: <2023-01-30 22:59 (kyle)>
+  #+TIMESTAMP: <2023-02-02 12:45 (kyle)>
 
 * Constants
 
@@ -556,7 +556,6 @@
         .RECIPEPREFIX = >
 
         CXX = i686-pc-msdosdjgpp-gcc
-        #CXXFLAGS = -m16 -Wall
         CXXFLAGS = -m32 -Wall
 
         all: lines
@@ -605,8 +604,8 @@
         typedef unsigned char byte;
         typedef unsigned short ushort;
 
-        byte* vga = (byte*)VIDEO_MEMORY;
-        ushort* clk = (ushort*)SYSTEM_CLOCK;
+        byte *vga = (byte *)VIDEO_MEMORY;
+        ushort *clk = (ushort *)SYSTEM_CLOCK;
 
         void set_mode(byte mode) {
             union REGS regs;
@@ -652,7 +651,9 @@
             y = y1;
 
             while (1) {
-                draw_pixel(x, y, color);
+                if (x < SCREEN_WIDTH && y < SCREEN_HEIGHT) {
+                    draw_pixel(x, y, color);
+                }
                 if (x == x2 && y == y2) break;
                 e2 = 2 * e1;
                 if (e2 >= dy) {
@@ -682,7 +683,7 @@
             y2 = 0;
             color = 1;
 
-            for (deg = 0; deg <= 90; deg += 3) {
+            for (deg = 0; deg <= 90; deg += 1) {
                 // draw line
                 draw_line(x1, y1, x2, y2, color);
 
@@ -690,7 +691,7 @@
                 y2 = (ushort)((SCREEN_HEIGHT - 1) * sin(degrees_to_radians(deg)));
             }
             y2 = SCREEN_HEIGHT - 1;
-            for (deg = 90; deg <= 180; deg += 3) {
+            for (deg = 90; deg <= 180; deg += 1) {
                 // draw line
                 draw_line(x1, y1, x2, y2, color);
 
@@ -706,7 +707,7 @@
             }
 
             vga += __djgpp_conventional_base;
-            clk = (void*)clk + __djgpp_conventional_base;
+            clk = (void *)clk + __djgpp_conventional_base;
 
             // seed number generator
             srand(*clk);
@@ -745,7 +746,6 @@
         .RECIPEPREFIX = >
 
         CXX = i686-pc-msdosdjgpp-gcc
-        #CXXFLAGS = -m16 -Wall
         CXXFLAGS = -m32 -Wall
 
         all: qixlines
@@ -756,16 +756,6 @@
 
         clean:
         > rm -f *.exe *.EXE
-      #+END_SRC
-
-***** sleep
-
-      #+BEGIN_SRC c :tangle :tangle qixlines/sleep.h
-        <<sleep_h>>
-      #+END_SRC
-
-      #+BEGIN_SRC c :tangle :tangle qixlines/sleep.c
-        <<sleep_c>>
       #+END_SRC
 
 ***** qixlines
@@ -815,8 +805,8 @@
             byte color;
         } line_s;
 
-        byte* vga = (byte*)VIDEO_MEMORY;
-        ushort* clk = (ushort*)SYSTEM_CLOCK;
+        byte *vga = (byte *)VIDEO_MEMORY;
+        ushort *clk = (ushort *)SYSTEM_CLOCK;
 
         void set_mode(byte mode) {
             union REGS regs;
@@ -838,7 +828,7 @@
             }
         }
 
-        void linecpy(line_s* target_line, line_s* source_line) {
+        void linecpy(line_s *target_line, line_s *source_line) {
             target_line->x1 = source_line->x1;
             target_line->y1 = source_line->y1;
             target_line->x2 = source_line->x2;
@@ -854,7 +844,7 @@
             vga[offset] = color;
         }
 
-        void draw_line(line_s* line) {
+        void draw_line(line_s *line) {
             ushort x1, y1, x2, y2, x, y;
             byte color;
             int dx, dy, sx, sy, e1, e2;
@@ -877,7 +867,9 @@
             y = y1;
 
             while (1) {
-                draw_pixel(x, y, color);
+                if (x < SCREEN_WIDTH && y < SCREEN_HEIGHT) {
+                    draw_pixel(x, y, color);
+                }
                 if (x == x2 && y == y2) break;
                 e2 = 2 * e1;
                 if (e2 >= dy) {
@@ -904,7 +896,7 @@
             return degree * M_PI / 180.0;
         }
 
-        void next_line(line_s* line, line_s* line_delta, line_s* line_degree) {
+        void next_line(line_s *line, line_s *line_delta, line_s *line_degree) {
             // randomly add to the degrees
             line_degree->x1 = next_degree(line_degree->x1);
             line_degree->y1 = next_degree(line_degree->y1);
@@ -1012,14 +1004,14 @@
             getch();
         }
 
-        int main(void) {
+        int main(int argc, char *argv[]) {
             if (__djgpp_nearptr_enable() == 0) {
                 printf("Could not get access to first 640K of memory\n");
                 exit(EXIT_FAILURE);
             }
 
             vga += __djgpp_conventional_base;
-            clk = (void*)clk + __djgpp_conventional_base;
+            clk = (void *)clk + __djgpp_conventional_base;
 
             // seed number generator
             srand(*clk);
@@ -1047,230 +1039,14 @@
         make clean && make && dosbox qixlines.exe &
       #+END_SRC
 
-*** +Qix Lines (Multi-Color)+
-
-***** Makefile
-
-      #+BEGIN_SRC makefile :tangle qix-lines-multi-color/Makefile
-        .RECIPEPREFIX = >
-
-        CXX = cc65
-        CLX = cl65
-        CXXFLAGS = -t DOS -O
-
-        all: qixlinesmc.prg
-
-        qixlinesmc.prg:
-        > $(CLX) $(CXXFLAGS) -o qixlinesmc.prg *.c
-
-        clean:
-        > rm -f *.prg *.inc *.o
-      #+END_SRC
-
-***** common
-
-      #+BEGIN_SRC c :tangle :tangle qix-lines-multi-color/common.h
-        <<common_h>>
-      #+END_SRC
-
-      #+BEGIN_SRC c :tangle :tangle qix-lines-multi-color/common.c
-        <<common_c>>
-      #+END_SRC
-
-***** mcbitmap
-
-      #+BEGIN_SRC c :tangle :tangle qix-lines-multi-color/mcbitmap.h
-        <<mcbitmap_h>>
-      #+END_SRC
-
-      #+BEGIN_SRC c :tangle :tangle qix-lines-multi-color/mcbitmap.c
-        <<mcbitmap_c>>
-      #+END_SRC
-
-***** qixlinesmc
-
-      #+BEGIN_SRC c :tangle qix-lines-multi-color/qixlinesmc.c
-        /**
-         ,* QIX Lines (Multi-Color)
-         ,*/
-
-        #include <DOS.h>
-        #include <cc65.h>
-        #include <conio.h>
-        #include <ctype.h>
-        #include <modload.h>
-        #include <stdio.h>
-        #include <stdlib.h>
-        #include <tgi.h>
-
-        #include "mcbitmap.h"
-
-        #define X_SIZE 160
-        #define Y_SIZE 192
-        #define MAX_COLORS 16
-        #define COLOR_BG TGI_COLOR_BLACK
-        #define MAX_SIN 180
-        #define HISTORY_SIZE 10                 // how many lines to display at once
-        #define STEP 10                         // line spacing
-        #define STEP_RANGE 9                    // spacing plus/minus range
-        #define QIX_COUNT 3                     // number of qixs to display
-
-        // use all colors except black (0)
-        #define RANDOM_COLOR() (rand() % (MAX_COLORS - 1) + 1)
-
-        // line
-        typedef struct {
-            int x1;
-            int y1;
-            int x2;
-            int y2;
-            byte color;
-        } line_s;
-
-        int next_degree(int degree) {
-            // add randomly to the degree
-            int d = degree + STEP + (int)rand() % (STEP_RANGE * 2 + 1) - STEP_RANGE;
-            if (d >= MAX_SIN) d = d - MAX_SIN;
-            return d;
-        }
-
-        void next_line(line_s *line, line_s *line_delta, line_s *line_degree) {
-            // randomly add to the degrees
-            line_degree->x1 = next_degree(line_degree->x1);
-            line_degree->y1 = next_degree(line_degree->y1);
-            line_degree->x2 = next_degree(line_degree->x2);
-            line_degree->y2 = next_degree(line_degree->y2);
-
-            // add using sin modified by a delta for each coordinate dimension
-            line->x1 += (int)(((long) line_delta->x1 * _sin(line_degree->x1)) / 256);
-            line->y1 += (int)(((long) line_delta->y1 * _sin(line_degree->y1)) / 256);
-            line->x2 += (int)(((long) line_delta->x2 * _sin(line_degree->x2)) / 256);
-            line->y2 += (int)(((long) line_delta->y2 * _sin(line_degree->y2)) / 256);
-
-            // if any coordinates are out of range, reverse their direction and change color
-            if (line->x1 < 0) {
-                line->x1 = 0 - line->x1;
-                line_delta->x1 = -line_delta->x1;
-                line->color = RANDOM_COLOR();
-            }
-            if (line->x1 >= X_SIZE) {
-                line->x1 = X_SIZE - (line->x1 - X_SIZE);
-                line_delta->x1 = -line_delta->x1;
-                line->color = RANDOM_COLOR();
-            }
-            if (line->y1 < 0) {
-                line->y1 = 0 - line->y1;
-                line_delta->y1 = -line_delta->y1;
-                line->color = RANDOM_COLOR();
-            }
-            if (line->y1 >= Y_SIZE) {
-                line->y1 = Y_SIZE - (line->y1 - Y_SIZE);
-                line_delta->y1 = -line_delta->y1;
-                line->color = RANDOM_COLOR();
-            }
-            if (line->x2 < 0) {
-                line->x2 = 0 - line->x2;
-                line_delta->x2 = -line_delta->x2;
-                line->color = RANDOM_COLOR();
-            }
-            if (line->x2 >= X_SIZE) {
-                line->x2 = X_SIZE - (line->x2 - X_SIZE);
-                line_delta->x2 = -line_delta->x2;
-                line->color = RANDOM_COLOR();
-            }
-            if (line->y2 < 0) {
-                line->y2 = 0 - line->y2;
-                line_delta->y2 = -line_delta->y2;
-                line->color = RANDOM_COLOR();
-            }
-            if (line->y2 >= Y_SIZE) {
-                line->y2 = Y_SIZE - (line->y2 - Y_SIZE);
-                line_delta->y2 = -line_delta->y2;
-                line->color = RANDOM_COLOR();
-            }
-        }
-
-        // draw lines until a key is pressed
-        void draw_lines() {
-            line_s line, line_delta, line_degree, line_history[HISTORY_SIZE];
-            int history_index;
-
-            // randomize starting values
-            line.x1 = rand() % X_SIZE;
-            line.y1 = rand() % Y_SIZE;
-            line.x2 = rand() % X_SIZE;
-            line.y2 = rand() % Y_SIZE;
-            line.color = RANDOM_COLOR();
-
-            line_delta.x1 = STEP;
-            line_delta.y1 = STEP;
-            line_delta.x2 = STEP;
-            line_delta.y2 = STEP;
-
-            line_degree.x1 = rand() % MAX_SIN;
-            line_degree.y1 = rand() % MAX_SIN;
-            line_degree.x2 = rand() % MAX_SIN;
-            line_degree.y2 = rand() % MAX_SIN;
-            history_index = 0;
-
-            // loop until key-press
-            while (!kbhit()) {
-                // get next line
-                next_line(&line, &line_delta, &line_degree);
-
-                // draw line
-                draw_line(line.x1, line.y1, line.x2, line.y2, line.color);
-
-                // remove from history
-                draw_line(line_history[history_index].x1, line_history[history_index].y1,
-                          line_history[history_index].x2, line_history[history_index].y2,
-                          COLOR_BG);
-
-                // add to history
-                line_history[history_index++] = line;
-                if (history_index >= HISTORY_SIZE) history_index = 0;
-            }
-            cgetc();                            // consume key-press
-        }
-
-        int main(void) {
-            unsigned char bg_color, border_color;
-
-            // setup multi-color bitmap
-            setup_bitmap_multi();
-
-            // persist background and border color
-            bg_color = bgcolor(COLOR_BG);
-            border_color = bordercolor(COLOR_BG);
-
-            // clear screen
-            clrscr();
-
-            // main loop
-            draw_lines();
-
-            // restore background and border color
-            bgcolor(bg_color);
-            bordercolor(border_color);
-
-            return EXIT_SUCCESS;
-        }
-      #+END_SRC
-
-***** Build and Run
-
-      #+BEGIN_SRC sh :dir (file-name-directory buffer-file-name)
-        cd qix-lines-multi-color
-        make clean && make && x64sc qixlinesmc.prg &
-      #+END_SRC
 * README.org
 
   #+BEGIN_SRC org :tangle README.org
     ,* cc65 Programs for MS-DOS
 
-      See the "Build and Run" sections of [[file:msdos-cc65.org][msdos-cc65.org]]
-      to see how to build, clean, and run these applications using the VICE
-      emulator. In general you follow these steps:
+      See the "Build and Run" sections of [[file:msdos-cc65.org][msdos-cc65.org]] to see how to build, clean,
+      and run these applications using the DOSBox emulator. In general you follow
+      these steps:
 
       Build with =make=.
 
@@ -1278,8 +1054,8 @@
 
       Run with =dosbox NAME.EXE=.
 
-      All files are generated from [[file:msdos-cc65.org][msdos-cc65.org]] using
-      Emacs' org-mode literate programming system to "tangle" them.
+      All files are generated from [[file:msdos-cc65.org][msdos-cc65.org]] using Emacs' org-mode literate
+      programming system to "tangle" them.
 
       root42's "Let's Code: MS-DOS" series was instrumental in creating these
       programs.
@@ -1288,25 +1064,16 @@
 
       License: [[file:LICENSE][BSD 2-Clause License]]
 
-    ,*** [[hello-world][Hello World]]
+    ,*** [[hello][Hello World]]
 
-        Just prints "HELLO WORLD!".
+        Just prints "Hello World!".
 
-    ,*** [[system-info][System Info]]
-
-        Displays some basic system information.
-
-    ,*** [[qix-lines][Qix Lines]]
+    ,*** [[qixlines][Qix Lines]]
 
         Draws lines on the screen like the game Qix.
 
         ,#+NAME: Qix Lines Video
-        [[file:qix-lines/qixlines.mkv][file:qix-lines/qixlines.gif]]
-
-    ,*** [[qix-lines-multi-color][Qix Lines (Multi Color)]]
-
-        Attempt at a multi-colored version of Qix Lines, but it is both slow and
-        not working ATM.
+        [[file:qixlines/qixlines.mkv][file:qix-lines/qixlines.gif]]
   #+END_SRC
 
 * LICENSE
