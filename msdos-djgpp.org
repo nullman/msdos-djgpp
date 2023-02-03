@@ -1,14 +1,14 @@
 * Org                                                              :noexport:
-  #+TITLE: MS-DOS cc65 Programs
+  #+TITLE: MS-DOS DJGPP GCC Programs
   #+AUTHOR: Kyle W T Sherman
   #+EMAIL: kylewsherman@gmail.com
-  #+FILENAME: ms-dos-cc65.org
-  #+DESCRIPTION: Org/Babel 'Literate' Version of MS-DOS Programs
-  #+KEYWORDS: emacs, org-mode, babel, c, cc65, ms-dos, dos, msdos, programming language, literate programming, reproducible research
+  #+FILENAME: ms-dos-djgpp.org
+  #+DESCRIPTION: Org/Babel 'Literate' Version of MS-DOS DJGPP GCC Programs
+  #+KEYWORDS: emacs, org-mode, babel, c, gcc, djgpp, ms-dos, dos, msdos, programming language, literate programming, reproducible research
   #+LANGUAGE: en
   #+PROPERTY: header-args :tangle no :noweb yes :padline yes :comments no :results silent :dir /tmp :mkdirp yes
   #+STARTUP: noindent odd overview
-  #+TIMESTAMP: <2023-02-02 14:06 (kyle)>
+  #+TIMESTAMP: <2023-02-02 20:50 (kyle)>
 
 * Constants
 
@@ -1104,9 +1104,9 @@
 * README.org
 
   #+BEGIN_SRC org :tangle README.org
-    ,* cc65 Programs for MS-DOS
+    ,* DJGPP GCC Programs for MS-DOS
 
-      See the "Build and Run" sections of [[file:msdos-cc65.org][msdos-cc65.org]] to see how to build, clean,
+      See the "Build and Run" sections of [[file:msdos-djgpp.org][msdos-djgpp.org]] to see how to build, clean,
       and run these applications using the DOSBox emulator. In general you follow
       these steps:
 
@@ -1116,7 +1116,7 @@
 
       Run with =dosbox NAME.EXE=.
 
-      All files are generated from [[file:msdos-cc65.org][msdos-cc65.org]] using Emacs' org-mode literate
+      All files are generated from [[file:msdos-djgpp.org][msdos-djgpp.org]] using Emacs' org-mode literate
       programming system to "tangle" them.
 
       root42's "Let's Code: MS-DOS" series was instrumental in creating these
