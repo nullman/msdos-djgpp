@@ -7,29 +7,31 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/nearptr.h>
 
 #define VIDEO_INT 0x10                  // BIOS video interrupt
 #define SET_MODE 0x00                   // BIOS function to set video mode
-#define VGA_256_COLOR_MODE 0x13         // use to set 256 VGA color mode
+#define VGA_16_COLOR_MODE 0x12          // use to set 16 color VGA mode
+#define VGA_256_COLOR_MODE 0x13         // use to set 256 color VGA mode
 #define TEXT_MODE 0x03                  // use to set text mode
 #define PIXEL_PLOT 0x0C                 // BIOS function to plot a pixel
 #define VIDEO_MEMORY 0xA0000            // start of video memory
 #define SYSTEM_CLOCK 0x046C             // system clock memory location
-#define SCREEN_WIDTH 320                // width in pixels of VGA mode 0x13
-#define SCREEN_HEIGHT 200               // height in pixels of VGA mode 0x13
-#define NUM_COLORS 256                  // number of colors in VGA mode
+#define VGA_16_COLOR_SCREEN_WIDTH 640   // width in pixels of VGA mode 0x12
+#define VGA_16_COLOR_SCREEN_HEIGHT 480  // height in pixels of VGA mode 0x12
+#define VGA_16_COLOR_NUM_COLORS 16      // number of colors in VGA mode 0x12
+#define VGA_256_COLOR_SCREEN_WIDTH 320  // width in pixels of VGA mode 0x13
+#define VGA_256_COLOR_SCREEN_HEIGHT 200 // height in pixels of VGA mode 0x13
+#define VGA_256_COLOR_NUM_COLORS 256    // number of colors in VGA mode 0x13
 #define CLOCK_HZ 18.2                   // system clock HZ
 
-#define COLOR_BG 0
-#define COLOR_FG 1
-#define MAX_SIN 180
+#define COLOR_BG 0                      // default background color
+#define COLOR_FG 1                      // default foreground color
+#define MAX_SIN 180                     // maximum allowed value for sin math
 #define HISTORY_SIZE 10                 // how many lines to display at once
 #define STEP 8                          // line spacing
 #define STEP_RANGE 6                    // spacing plus/minus range
-
-// use all colors except black (0)
-#define RANDOM_COLOR() (rand() % (NUM_COLORS - 1) + 1)
 
 typedef unsigned char byte;
 typedef unsigned short ushort;
@@ -42,7 +44,14 @@ typedef struct {
     byte color;
 } line_s;
 
+typedef struct {
+    byte help;
+    byte vga_mode;
+} args_s;
+
 byte *vga = (byte *)VIDEO_MEMORY;
+byte vga_mode;
+ushort screen_width, screen_height, num_colors;
 ushort *clk = (ushort *)SYSTEM_CLOCK;
 
 void set_mode(byte mode) {
@@ -65,6 +74,11 @@ void sleep(int msec) {
     }
 }
 
+byte random_color() {
+    // use all colors except black
+    return rand() % (num_colors - 1) + 1;
+}
+
 void linecpy(line_s *target_line, line_s *source_line) {
     target_line->x1 = source_line->x1;
     target_line->y1 = source_line->y1;
@@ -76,7 +90,7 @@ void linecpy(line_s *target_line, line_s *source_line) {
 void draw_pixel(ushort x, ushort y, byte color) {
     ushort offset;
 
-    offset = y * SCREEN_WIDTH + x;
+    offset = y * screen_width + x;
     //offset = (y<<8) + (y<<6) + x;       // faster, but harder to understand
     vga[offset] = color;
 }
@@ -104,7 +118,7 @@ void draw_line(line_s *line) {
     y = y1;
 
     while (1) {
-        if (x < SCREEN_WIDTH && y < SCREEN_HEIGHT) {
+        if (x < screen_width && y < screen_height) {
             draw_pixel(x, y, color);
         }
         if (x == x2 && y == y2) break;
@@ -150,42 +164,42 @@ void next_line(line_s *line, line_s *line_delta, line_s *line_degree) {
     if (line->x1 < 0) {
         line->x1 = 0 - line->x1;
         line_delta->x1 = -line_delta->x1;
-        line->color = RANDOM_COLOR();
+        line->color = random_color();
     }
-    if (line->x1 >= SCREEN_WIDTH) {
-        line->x1 = SCREEN_WIDTH - (line->x1 - SCREEN_WIDTH);
+    if (line->x1 >= screen_width) {
+        line->x1 = screen_width - (line->x1 - screen_width);
         line_delta->x1 = -line_delta->x1;
-        line->color = RANDOM_COLOR();
+        line->color = random_color();
     }
     if (line->y1 < 0) {
         line->y1 = 0 - line->y1;
         line_delta->y1 = -line_delta->y1;
-        line->color = RANDOM_COLOR();
+        line->color = random_color();
     }
-    if (line->y1 >= SCREEN_HEIGHT) {
-        line->y1 = SCREEN_HEIGHT - (line->y1 - SCREEN_HEIGHT);
+    if (line->y1 >= screen_height) {
+        line->y1 = screen_height - (line->y1 - screen_height);
         line_delta->y1 = -line_delta->y1;
-        line->color = RANDOM_COLOR();
+        line->color = random_color();
     }
     if (line->x2 < 0) {
         line->x2 = 0 - line->x2;
         line_delta->x2 = -line_delta->x2;
-        line->color = RANDOM_COLOR();
+        line->color = random_color();
     }
-    if (line->x2 >= SCREEN_WIDTH) {
-        line->x2 = SCREEN_WIDTH - (line->x2 - SCREEN_WIDTH);
+    if (line->x2 >= screen_width) {
+        line->x2 = screen_width - (line->x2 - screen_width);
         line_delta->x2 = -line_delta->x2;
-        line->color = RANDOM_COLOR();
+        line->color = random_color();
     }
     if (line->y2 < 0) {
         line->y2 = 0 - line->y2;
         line_delta->y2 = -line_delta->y2;
-        line->color = RANDOM_COLOR();
+        line->color = random_color();
     }
-    if (line->y2 >= SCREEN_HEIGHT) {
-        line->y2 = SCREEN_HEIGHT - (line->y2 - SCREEN_HEIGHT);
+    if (line->y2 >= screen_height) {
+        line->y2 = screen_height - (line->y2 - screen_height);
         line_delta->y2 = -line_delta->y2;
-        line->color = RANDOM_COLOR();
+        line->color = random_color();
     }
 }
 
@@ -195,10 +209,10 @@ void draw_lines() {
     ushort i, history_index;
 
     // randomize starting values
-    line.x1 = rand() % SCREEN_WIDTH;
-    line.y1 = rand() % SCREEN_HEIGHT;
-    line.x2 = rand() % SCREEN_WIDTH;
-    line.y2 = rand() % SCREEN_HEIGHT;
+    line.x1 = rand() % screen_width;
+    line.y1 = rand() % screen_height;
+    line.x2 = rand() % screen_width;
+    line.y2 = rand() % screen_height;
     line.color = COLOR_BG;
 
     line_delta.x1 = STEP;
@@ -241,7 +255,27 @@ void draw_lines() {
     getch();
 }
 
+void parse_args(int argc, char *argv[], args_s *args) {
+    int i;
+
+    // set defaults
+    args->help = 0;
+    args->vga_mode = VGA_256_COLOR_MODE;
+
+    for (i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "lo") == 0) {
+            args->vga_mode = VGA_256_COLOR_MODE;
+        } else if (strcmp(argv[i], "hi") == 0) {
+            args->vga_mode = VGA_16_COLOR_MODE;
+        } else {
+            args->help = 1;
+        }
+    }
+}
+
 int main(int argc, char *argv[]) {
+    args_s args;
+
     if (__djgpp_nearptr_enable() == 0) {
         printf("Could not get access to first 640K of memory\n");
         exit(EXIT_FAILURE);
@@ -253,8 +287,36 @@ int main(int argc, char *argv[]) {
     // seed number generator
     srand(*clk);
 
+    // defaults
+    args.help = 0;
+    args.vga_mode = VGA_256_COLOR_MODE;
+
+    // parse parameters
+    parse_args(argc, argv, &args);
+
+    // display help
+    if (args.help) {
+        printf("Usage: %s [lo|hi]\n", argv[0]);
+        printf("Where:\n");
+        printf("  lo - VGA 256 color mode (320x200)\n");
+        printf("  hi - VGA 16 color mode (640x480)\n");
+        return EXIT_FAILURE;
+    }
+
+    // set modes
+    vga_mode = args.vga_mode;
+    if (vga_mode == VGA_256_COLOR_MODE) {
+        screen_width = VGA_256_COLOR_SCREEN_WIDTH;
+        screen_height = VGA_256_COLOR_SCREEN_HEIGHT;
+        num_colors = VGA_256_COLOR_NUM_COLORS;
+    } else {
+        screen_width = VGA_16_COLOR_SCREEN_WIDTH;
+        screen_height = VGA_16_COLOR_SCREEN_HEIGHT;
+        num_colors = VGA_16_COLOR_NUM_COLORS;
+    }
+
     // set vga mode and clear screen
-    set_mode(VGA_256_COLOR_MODE);
+    set_mode(vga_mode);
 
     // main loop
     draw_lines();
