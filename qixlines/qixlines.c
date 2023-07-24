@@ -75,8 +75,7 @@ void sleep(int msec) {
 }
 
 byte random_color() {
-    // use all colors except black
-    return rand() % (num_colors - 1) + 1;
+    return rand() % num_colors;
 }
 
 void linecpy(line_s *target_line, line_s *source_line) {

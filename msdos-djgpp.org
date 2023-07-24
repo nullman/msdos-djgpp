@@ -2,13 +2,13 @@
   #+TITLE: MS-DOS DJGPP GCC Programs
   #+AUTHOR: Kyle W T Sherman
   #+EMAIL: kylewsherman@gmail.com
-  #+FILENAME: ms-dos-djgpp.org
+  #+FILENAME: msdos-djgpp.org
   #+DESCRIPTION: Org/Babel 'Literate' Version of MS-DOS DJGPP GCC Programs
   #+KEYWORDS: emacs, org-mode, babel, c, gcc, djgpp, ms-dos, dos, msdos, programming language, literate programming, reproducible research
   #+LANGUAGE: en
   #+PROPERTY: header-args :tangle no :noweb yes :padline yes :comments no :results silent :dir /tmp :mkdirp yes
   #+STARTUP: noindent odd overview
-  #+TIMESTAMP: <2023-02-07 10:23 (kyle)>
+  #+TIMESTAMP: <2023-07-24 16:28 (kyle)>
 
 * Constants
 
@@ -112,6 +112,9 @@
 * BIN
 
 *** CWSDPMI.EXE
+
+    Needed in order to toggle to real mode from a protected mode MS-DOS
+    executable.
 
     #+BEGIN_SRC sh :var path=(file-name-directory (buffer-file-name))
       mkdir -p "${path}"/bin
@@ -495,8 +498,6 @@
       chmod 755 "${path}/bin/CWSDPMI.EXE"
     #+END_SRC
 
-* Shared
-
 * Programs
 
 *** Hello World
@@ -833,8 +834,7 @@
         }
 
         byte random_color() {
-            // use all colors except black
-            return rand() % (num_colors - 1) + 1;
+            return rand() % num_colors;
         }
 
         void linecpy(line_s *target_line, line_s *source_line) {
