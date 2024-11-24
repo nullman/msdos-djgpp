@@ -1,5 +1,7 @@
 /**
  * QIX Lines
+ *
+ * Draw QIX lines with alternating colors.
  */
 
 #include <conio.h>
@@ -75,7 +77,12 @@ void sleep(int msec) {
 }
 
 byte random_color() {
-    return rand() % num_colors;
+    if (vga_mode == vga_mode == VGA_256_COLOR_MODE) {
+        return rand() % num_colors;
+    } else {
+        // use all colors except black (0)
+        return rand() % (num_colors - 1) + 1;
+    }
 }
 
 void linecpy(line_s *target_line, line_s *source_line) {

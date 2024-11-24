@@ -1,5 +1,5 @@
 /**
- * Hello World
+ * Print: Hello World!
  */
 
 #include <stdio.h>                      // printf
