@@ -8,7 +8,7 @@
   #+LANGUAGE: en
   #+PROPERTY: header-args :tangle no :noweb yes :padline yes :comments no :results silent :dir /tmp :mkdirp yes
   #+STARTUP: noindent odd overview
-  #+TIMESTAMP: <2023-07-25 23:41 (kyle)>
+  #+TIMESTAMP: <2024-11-24 12:37 (user)>
 
 * Constants
 
@@ -525,14 +525,14 @@
 
       #+BEGIN_SRC c :tangle hello/hello.c
         /**
-         ,* Print: Hello World!
+         ,* Print: Hello, world!
          ,*/
 
         #include <stdio.h>                      // printf
         #include <stdlib.h>                     // EXIT_SUCCESS
 
         int main(void) {
-            printf("Hello World!\n");
+            printf("Hello, world!\n");
             return EXIT_SUCCESS;
         }
       #+END_SRC
@@ -1265,6 +1265,12 @@
         make clean && make && dosbox qixlines.exe &
       #+END_SRC
 
+* .gitignore
+
+  #+BEGIN_SRC conf-unix :tangle .gitignore
+    ,*\.SWP
+  #+END_SRC
+
 * README.org
 
   #+BEGIN_SRC org :tangle README.org
@@ -1292,7 +1298,7 @@
 
     ,*** [[hello][Hello World]]
 
-        Just prints "Hello World!".
+        Just prints "Hello, world!".
 
     ,*** [[qixlines][Qix Lines]]
 

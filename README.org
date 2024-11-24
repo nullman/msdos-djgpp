@@ -16,13 +16,13 @@
   root42's "Let's Code: MS-DOS" series was instrumental in creating these
   programs.
 
-  Copyright © 2023 Kyle W T Sherman
+  Copyright © 2023-2024 Kyle W T Sherman
 
   License: [[file:LICENSE][MIT License]]
 
 *** [[hello][Hello World]]
 
-    Just prints "Hello World!".
+    Just prints "Hello, world!".
 
 *** [[qixlines][Qix Lines]]
 
